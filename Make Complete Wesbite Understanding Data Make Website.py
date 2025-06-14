@@ -1,11 +1,22 @@
-from requests import get
+import base64
+from requests import get, post
+import json
+
+
+wp_user = 'masuk11'
+wp_pass = 'bVhE U4LD P7va 7guR XVvo Uhr4'
+wp_credential = f'{wp_user}:{wp_pass}'
+wp_token = base64.b64encode(wp_credential.encode())
+wp_headers = {
+    'Authorization': f'Basic {wp_token.decode('utf-8')}',
+    'User-Agent': 'Firefox/5.0'
+}
 
 server_url = 'https://mobile-phone-server.vercel.app/phones'
 res = get(server_url)
 if res.status_code == 200:
     data = res.json()
     phones = data.get('RECORDS')
-
 
 
 def media_from_url(img_src, phone_name):
@@ -42,6 +53,30 @@ def wp_paragraph(text):
 def wp_heading_two(text):
     return f'<!-- wp:heading --> <h2 class="wp-block-heading">{text}</h2> <!-- /wp:heading -->'
 
+def concatenate_string(*args):
+    final = ''
+    for arg in args:
+        final += arg
+    return final
+
+def slugify(name):
+    codes = name.strip().replace(' ', '-')
+    return codes
+
+def create_wp_post(title, content, slug):
+    wp_url = 'https://ananyaskitchen.infy.uk/wp-json/wp/v2/posts'
+    data = {
+        'title': title,
+        'content': content,
+        'slug': slug
+    }
+    response = post(wp_url, headers=wp_headers, json=data)
+    if response.status_code in [200, 201]:
+        print(f'{title} is posted successfully.')
+    else:
+        print(f'Failed to post {title}. Status code: {response.status_code}')
+
+
 
 for phone in phones:
     name = phone.get('name').title()
@@ -51,13 +86,13 @@ for phone in phones:
     os = phone.get('os')
     picture = phone.get('picture')
 
-
     first_dictionary = {
         'name': name,
         'released_at': released_at,
         'chipset': chipset,
         'body': body
     }
+
     first_paragraph = (f'{name} has been released on {released_at}. ' \
                        f'It comes with {chipset}. The body of this mobile is {body}. ' \
                        f'{os} is the built-in Android version.')
@@ -67,9 +102,11 @@ for phone in phones:
     first_table = wp_table_dic(first_dictionary)
 
     # specifications section
-    specifications = phone.get('specifications')
-    print(type(specifications))
+    second_heading = wp_heading_two('Specification')
+    specifications_string = phone.get('specifications')
+    specifications = json.loads(specifications_string)
+    second_table = wp_table_dic(specifications)
 
-
-
-
+    content = concatenate_string(article_paragraph, first_image, first_heading, first_table, second_heading, second_table)
+    slug = slugify(name)
+    create_wp_post(name, content, slug)
