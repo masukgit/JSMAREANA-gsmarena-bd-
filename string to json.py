@@ -6,4 +6,4 @@ my_dicts = {
 }
 data = my_dicts.get('specifications')
 json_data = json.loads(data)
-print(type(json_data))
+print(json_data)

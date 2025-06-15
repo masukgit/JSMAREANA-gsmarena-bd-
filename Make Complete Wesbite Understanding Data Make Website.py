@@ -3,8 +3,8 @@ from requests import get, post
 import json
 
 
-wp_user = 'masuk11'
-wp_pass = 'bVhE U4LD P7va 7guR XVvo Uhr4'
+wp_user = 'carcareia11'
+wp_pass = 'Uqq9 2VA7 2gCX GnWP y84L bdQ8'
 wp_credential = f'{wp_user}:{wp_pass}'
 wp_token = base64.b64encode(wp_credential.encode())
 wp_headers = {
@@ -63,12 +63,13 @@ def slugify(name):
     codes = name.strip().replace(' ', '-')
     return codes
 
-def create_wp_post(title, content, slug):
-    wp_url = 'https://ananyaskitchen.infy.uk/wp-json/wp/v2/posts'
+def create_wp_post(title, content, slug, excerpt):
+    wp_url = 'https://carcareia.com/wp-json/wp/v2/posts'
     data = {
         'title': title,
         'content': content,
-        'slug': slug
+        'slug': slug,
+        'excerpt': excerpt
     }
     response = post(wp_url, headers=wp_headers, json=data)
     if response.status_code in [200, 201]:
@@ -80,17 +81,17 @@ def create_wp_post(title, content, slug):
 
 for phone in phones:
     name = phone.get('name').title()
-    released_at = phone.get('released_at').lower().replace('Released ', ' ')
+    released_at = phone.get('released_at').lower().replace('released ', ' ')
     chipset = phone.get('chipset')
     body = phone.get('body')
     os = phone.get('os')
     picture = phone.get('picture')
 
     first_dictionary = {
-        'name': name,
-        'released_at': released_at,
-        'chipset': chipset,
-        'body': body
+        'Name': name,
+        'Released_at': released_at,
+        'Chipset': chipset,
+        'Body': body
     }
 
     first_paragraph = (f'{name} has been released on {released_at}. ' \
@@ -109,4 +110,4 @@ for phone in phones:
 
     content = concatenate_string(article_paragraph, first_image, first_heading, first_table, second_heading, second_table)
     slug = slugify(name)
-    create_wp_post(name, content, slug)
+    create_wp_post(name, content, slug, first_paragraph)
